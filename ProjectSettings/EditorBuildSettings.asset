@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/_Scenes/Forest_treehealth.unity
     guid: c732593fe76e5a84197f9cd13963f706
   - enabled: 1
+    path: Assets/_Scenes/GardenScene.unity
+    guid: 81e71078978223e4c8ffbf973484c9c5
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 55daccc09a3b69647bbab145b54a3ab3
   m_configObjects:
