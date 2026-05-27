@@ -1,32 +1,76 @@
 using UnityEngine;
 
-/// <summary>
-/// Gives life to the visual guide by applying a mathematical sine wave 
-/// to its vertical position, creating a soft, continuous hovering effect.
-/// </summary>
 public class WispAnimator : MonoBehaviour
 {
-    [Header("Hover Settings")]
-    [Tooltip("How fast the wisp bobs up and down.")]
-    public float hoverSpeed = 2f;
-    [Tooltip("How high and low the wisp travels from its starting point.")]
-    public float hoverHeight = 0.05f;
+    public enum NavigationMode { Sequential, Random, FollowPlayer }
+    
+    public NavigationMode navigationMode = NavigationMode.FollowPlayer;
 
-    // We store the original starting position so the wisp always hovers around its spawn point.
-    private Vector3 startPosition;
+    [Header("Navigation Setup")]
+    public Transform[] waypoints;
+    public Transform playerTransform;
+    public Vector3 localFollowOffset = new Vector3(0.6f, -0.2f, 1.0f);
+
+    [Header("Movement Tuning")]
+    public float flySpeed = 1.5f;
+    public float rotationSpeed = 2f;
+    public float hoverSpeed = 0.5f;
+    public float hoverHeight = 0.01f;
+
+    private int waypointIndex = 0;
+    private Vector3 basePosition;
 
     private void Start()
     {
-        startPosition = transform.position;
+        basePosition = transform.position;
     }
 
     private void Update()
     {
-        // Calculate the new Y position using a Sine wave based on the current game time.
-        // This guarantees a perfectly smooth, endless looping animation without needing Unity's Animator window.
-        float newY = startPosition.y + (Mathf.Sin(Time.time * hoverSpeed) * hoverHeight);
+        Vector3 targetPos = GetTargetPosition();
+        
+        // 1. Move the base position towards targetPos (feedback-loop free!)
+        basePosition = Vector3.Lerp(basePosition, targetPos, Time.deltaTime * flySpeed);
+        
+        // 2. Apply a clean, absolute micro hover on top of the base position
+        float hoverOffset = Mathf.Sin(Time.time * hoverSpeed) * hoverHeight;
+        transform.position = basePosition + new Vector3(0f, hoverOffset, 0f);
 
-        // Apply the new vertical position while keeping X and Z exactly the same.
-        transform.position = new Vector3(startPosition.x, newY, startPosition.z);
+        // 2. Rotate to face the player or target
+        Vector3 lookTarget = navigationMode == NavigationMode.FollowPlayer ? GetPlayerTransform().position : targetPos;
+        Vector3 lookDir = lookTarget - transform.position;
+        
+        if (lookDir != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(lookDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
+        }
+
+        // 3. Waypoint Progression
+        if (navigationMode != NavigationMode.FollowPlayer && waypoints.Length > 0)
+        {
+            if (Vector3.Distance(transform.position, targetPos) < 0.2f)
+            {
+                waypointIndex = navigationMode == NavigationMode.Sequential 
+                    ? (waypointIndex + 1) % waypoints.Length 
+                    : Random.Range(0, waypoints.Length);
+            }
+        }
+    }
+
+    private Vector3 GetTargetPosition()
+    {
+        if (navigationMode == NavigationMode.FollowPlayer)
+        {
+            // TransformPoint applies the offset relative to the camera's local rotation
+            return GetPlayerTransform().TransformPoint(localFollowOffset);
+        }
+        
+        return waypoints.Length > 0 ? waypoints[waypointIndex].position : transform.position;
+    }
+
+    private Transform GetPlayerTransform()
+    {
+        return playerTransform != null ? playerTransform : Camera.main.transform;
     }
 }
