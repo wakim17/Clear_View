@@ -33031,6 +33031,7 @@ GameObject:
   - component: {fileID: 7393727920885621987}
   - component: {fileID: 1816722773562931487}
   - component: {fileID: 5577679863209826018}
+  - component: {fileID: 9221857540774847116}
   m_Layer: 0
   m_Name: WispGuide
   m_TagString: Untagged
@@ -48710,6 +48711,32 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &9221857540774847116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2715729993022735777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73857a9e3426398489da57220a3b2138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WispInteractable
+  currentMode: 0
+  wispMenuCanvas: {fileID: 7177791782303722121}
+  helpClips: []
+  totalOres: 5
+  generalCongratsClip: {fileID: 0}
+  helpHintClip: {fileID: 0}
+  remainingOresClips: []
+  gardenClip: {fileID: 0}
+  menuSceneName: Main_LivingRoom
+  loadDelay: 0.4
+  interactionChime: {fileID: 0}
+  pulseOnInteraction: 1
+  pulseScaleMultiplier: 1.3
+  pulseDuration: 0.25
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

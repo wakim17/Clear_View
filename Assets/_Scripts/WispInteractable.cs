@@ -8,13 +8,35 @@ using System.Collections;
 /// </summary>
 public class WispInteractable : MonoBehaviour
 {
+    public enum LocationMode { LivingRoom, Forest, Garden }
+
+    [Header("Context")]
+    [Tooltip("Set this to match the scene to change how the Wisp behaves.")]
+    public LocationMode currentMode = LocationMode.LivingRoom;
+
     [Header("UI Menu")]
     [Tooltip("The Canvas GameObject that contains the Wisp's floating menu buttons.")]
     public GameObject wispMenuCanvas;
 
-    [Header("Help Audio Settings")]
-    [Tooltip("Voice clips played when the player clicks the Help button.")]
+    [Header("Living Room Settings")]
+    [Tooltip("Voice clips played when the player clicks the Help button in the living room.")]
     public AudioClip[] helpClips;
+    
+    [Header("Forest Settings")]
+    public int totalOres = 5;
+    [Tooltip("Played when an ore is collected (e.g., 'Good job!')")]
+    public AudioClip generalCongratsClip;
+    [Tooltip("Played on Help click (e.g., 'Ores are in the area.')")]
+    public AudioClip helpHintClip;
+    [Tooltip("Array index = number of ores left (0 to 5)")]
+    public AudioClip[] remainingOresClips;
+
+    private int oresCollected = 0;
+
+    [Header("Garden Settings")]
+    [Tooltip("Audio clip played once in the garden.")]
+    public AudioClip gardenClip;
+    private bool gardenClipPlayed = false;
 
     [Header("Menu Return Settings")]
     [Tooltip("The name of the main menu scene to load.")]
@@ -38,6 +60,7 @@ public class WispInteractable : MonoBehaviour
     private bool isPulsing = false;
     private bool isLoadingMenu = false;
     private int helpClipIndex = 0;
+    private Coroutine currentAudioCoroutine;
 
     private void Awake()
     {
@@ -90,24 +113,100 @@ public class WispInteractable : MonoBehaviour
     /// </summary>
     public void PlayHelpAudio()
     {
-        if (helpClips == null || helpClips.Length == 0) return;
-        
-        if (audioSource != null)
-        {
-            AudioClip clipToPlay = helpClips[helpClipIndex];
-            if (clipToPlay != null)
-            {
-                audioSource.PlayOneShot(clipToPlay);
-            }
-
-            // Cycle to next clip for next time
-            helpClipIndex = (helpClipIndex + 1) % helpClips.Length;
-        }
-        
         // Hide menu after asking for help to keep the screen clear
         if (wispMenuCanvas != null)
         {
             wispMenuCanvas.SetActive(false);
+        }
+
+        if (audioSource != null)
+        {
+            audioSource.Stop(); // Stop any current audio
+            if (currentAudioCoroutine != null)
+            {
+                StopCoroutine(currentAudioCoroutine);
+            }
+
+            switch (currentMode)
+            {
+                case LocationMode.LivingRoom:
+                    if (helpClips != null && helpClips.Length > 0)
+                    {
+                        AudioClip clipToPlay = helpClips[helpClipIndex];
+                        if (clipToPlay != null)
+                        {
+                            audioSource.PlayOneShot(clipToPlay);
+                        }
+                        helpClipIndex = (helpClipIndex + 1) % helpClips.Length;
+                    }
+                    break;
+                case LocationMode.Forest:
+                    int oresLeft = totalOres - oresCollected;
+                    AudioClip remainingClip = GetRemainingOreClip(oresLeft);
+                    
+                    if (helpHintClip != null || remainingClip != null)
+                    {
+                        currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(helpHintClip, remainingClip));
+                    }
+                    break;
+                case LocationMode.Garden:
+                    if (!gardenClipPlayed && gardenClip != null)
+                    {
+                        audioSource.PlayOneShot(gardenClip);
+                        gardenClipPlayed = true;
+                    }
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called by CopperOre when an ore is collected.
+    /// </summary>
+    public void OnOreCollected()
+    {
+        if (currentMode != LocationMode.Forest) return;
+
+        oresCollected++;
+        if (oresCollected > totalOres) oresCollected = totalOres; // Cap it just in case
+
+        if (audioSource != null)
+        {
+            // If already playing audio, stop it so we can play the congrats immediately
+            audioSource.Stop(); 
+            if (currentAudioCoroutine != null)
+            {
+                StopCoroutine(currentAudioCoroutine);
+            }
+            
+            int oresLeft = totalOres - oresCollected;
+            AudioClip remainingClip = GetRemainingOreClip(oresLeft);
+            currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(generalCongratsClip, remainingClip));
+        }
+    }
+
+    private AudioClip GetRemainingOreClip(int oresLeft)
+    {
+        if (remainingOresClips != null && oresLeft >= 0 && oresLeft < remainingOresClips.Length)
+        {
+            return remainingOresClips[oresLeft];
+        }
+        return null;
+    }
+
+    private IEnumerator PlaySequentialAudio(AudioClip firstClip, AudioClip secondClip)
+    {
+        if (firstClip != null)
+        {
+            audioSource.clip = firstClip;
+            audioSource.Play();
+            yield return new WaitForSeconds(firstClip.length + 0.1f); // small gap
+        }
+
+        if (secondClip != null)
+        {
+            audioSource.clip = secondClip;
+            audioSource.Play();
         }
     }
 
@@ -117,6 +216,16 @@ public class WispInteractable : MonoBehaviour
     public void ReturnToMenu()
     {
         if (isLoadingMenu) return;
+
+        // The living room IS the main menu, so don't reload the scene if we are already here.
+        if (currentMode == LocationMode.LivingRoom)
+        {
+            if (wispMenuCanvas != null)
+            {
+                wispMenuCanvas.SetActive(false);
+            }
+            return;
+        }
         
         // Hide the menu immediately
         if (wispMenuCanvas != null)
