@@ -17,7 +17,7 @@ public class ObjectRespawn : MonoBehaviour
     private Quaternion initialRotation;
     private Rigidbody rb;
 
-    private void Start()
+    private void Awake()
     {
         // Store the starting position and rotation
         initialPosition = transform.position;
