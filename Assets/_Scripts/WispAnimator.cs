@@ -36,8 +36,12 @@ public class WispAnimator : MonoBehaviour
         float hoverOffset = Mathf.Sin(Time.time * hoverSpeed) * hoverHeight;
         transform.position = basePosition + new Vector3(0f, hoverOffset, 0f);
 
-        // 2. Rotate to face the player or target
+        // 2. Rotate to face the player or target (Horizontal only, to keep UI flat)
         Vector3 lookTarget = navigationMode == NavigationMode.FollowPlayer ? GetPlayerTransform().position : targetPos;
+        
+        // Flatten the target height so the Wisp doesn't pitch up/down
+        lookTarget.y = transform.position.y;
+        
         Vector3 lookDir = lookTarget - transform.position;
         
         if (lookDir != Vector3.zero)

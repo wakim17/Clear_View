@@ -58,7 +58,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2473545594844478943}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: -0, y: 0.99246836, z: 0.122501515, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0.7}
   m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
   m_ConstrainProportionsScale: 1
@@ -68,7 +68,7 @@ RectTransform:
   - {fileID: 5895513606465728572}
   - {fileID: 1336791958733460664}
   m_Father: {fileID: 2518332098635297180}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: -14.073, y: 180, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 1.3}
@@ -5956,11 +5956,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73857a9e3426398489da57220a3b2138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WispInteractable
+  currentMode: 0
   wispMenuCanvas: {fileID: 2473545594844478943}
   helpClips: []
+  totalOres: 5
+  generalCongratsClip: {fileID: 0}
+  helpHintClip: {fileID: 0}
+  remainingOresClips: []
+  gardenClip: {fileID: 0}
   menuSceneName: Main_LivingRoom
   loadDelay: 0.4
-  interactionChime: {fileID: 8300000, guid: 16fba6d30ed741d4a9fdd6e79ee2f3ac, type: 3}
+  interactionChime: {fileID: 8300000, guid: c77f3da979c2f024bbb492287de0905e, type: 3}
   pulseOnInteraction: 1
   pulseScaleMultiplier: 1.3
   pulseDuration: 0.25
