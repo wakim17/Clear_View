@@ -22,7 +22,7 @@ public class CopperOre : MonoBehaviour
     {
         // Cache components for better performance
         oreCollider = GetComponent<Collider>();
-        wisp = FindObjectOfType<WispInteractable>();
+        wisp = FindFirstObjectByType<WispInteractable>();
 
         // Set up AudioSource
         audioSource = GetComponent<AudioSource>();

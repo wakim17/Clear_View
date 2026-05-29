@@ -8,6 +8,10 @@ using System.Collections;
 /// </summary>
 public class WispInteractable : MonoBehaviour
 {
+    // TEMPLATE FOR ADDING ANOTHER ENVIRONMENT:
+    // 1. Add your new environment to the enum below (e.g., LivingRoom, Forest, Garden, NewArea).
+    // 2. Create a new section of variables with [Header("NewArea Settings")].
+    // 3. Go to the PlayHelpAudio() method and add a 'case LocationMode.NewArea:' to handle the logic.
     public enum LocationMode { LivingRoom, Forest, Garden }
 
     [Header("Context")]
@@ -19,10 +23,14 @@ public class WispInteractable : MonoBehaviour
     public GameObject wispMenuCanvas;
 
     [Header("Living Room Settings")]
+    [Tooltip("Played once upon loading the Living Room scene, after a 1 second delay.")]
+    public AudioClip livingRoomWelcomeClip;
     [Tooltip("Voice clips played when the player clicks the Help button in the living room.")]
     public AudioClip[] helpClips;
     
     [Header("Forest Settings")]
+    [Tooltip("Played once upon loading the Forest scene, after a 1 second delay.")]
+    public AudioClip forestWelcomeClip;
     public int totalOres = 5;
     [Tooltip("Played when an ore is collected (e.g., 'Good job!')")]
     public AudioClip generalCongratsClip;
@@ -34,9 +42,10 @@ public class WispInteractable : MonoBehaviour
     private int oresCollected = 0;
 
     [Header("Garden Settings")]
-    [Tooltip("Audio clip played once in the garden.")]
-    public AudioClip gardenClip;
-    private bool gardenClipPlayed = false;
+    [Tooltip("Played once upon loading the Garden scene, after a 1 second delay.")]
+    public AudioClip gardenWelcomeClip;
+    [Tooltip("Voice clips played when the player clicks the Help button in the garden.")]
+    public AudioClip[] gardenHelpClips;
 
     [Header("Menu Return Settings")]
     [Tooltip("The name of the main menu scene to load.")]
@@ -60,6 +69,7 @@ public class WispInteractable : MonoBehaviour
     private bool isPulsing = false;
     private bool isLoadingMenu = false;
     private int helpClipIndex = 0;
+    private int gardenHelpClipIndex = 0;
     private Coroutine currentAudioCoroutine;
 
     private void Awake()
@@ -82,6 +92,45 @@ public class WispInteractable : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        StartCoroutine(PlayWelcomeClipWithDelay());
+    }
+
+    private void Update()
+    {
+        if (pulseOnInteraction && !isPulsing && audioSource != null && audioSource.isPlaying)
+        {
+            StartCoroutine(PulseSequence());
+        }
+    }
+
+    private IEnumerator PlayWelcomeClipWithDelay()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (audioSource == null) yield break;
+
+        AudioClip clipToPlay = null;
+        switch (currentMode)
+        {
+            case LocationMode.LivingRoom:
+                clipToPlay = livingRoomWelcomeClip;
+                break;
+            case LocationMode.Forest:
+                clipToPlay = forestWelcomeClip;
+                break;
+            case LocationMode.Garden:
+                clipToPlay = gardenWelcomeClip;
+                break;
+        }
+
+        if (clipToPlay != null)
+        {
+            audioSource.PlayOneShot(clipToPlay);
+        }
+    }
+
     /// <summary>
     /// Core interaction method called by XRSimpleInteractable when the Wisp is clicked.
     /// Toggles the menu on and off.
@@ -89,6 +138,18 @@ public class WispInteractable : MonoBehaviour
     public void Interact()
     {
         if (isLoadingMenu) return;
+
+        if (pulseOnInteraction && !isPulsing)
+        {
+            StartCoroutine(PulseSequence());
+        }
+
+        // If we are in the Living Room, skip the menu and directly play help audio
+        if (currentMode == LocationMode.LivingRoom)
+        {
+            PlayHelpAudio();
+            return;
+        }
 
         // Toggle the UI Menu visibility
         if (wispMenuCanvas != null)
@@ -100,11 +161,6 @@ public class WispInteractable : MonoBehaviour
         if (audioSource != null && interactionChime != null)
         {
             audioSource.PlayOneShot(interactionChime);
-        }
-
-        if (pulseOnInteraction && !isPulsing)
-        {
-            StartCoroutine(PulseSequence());
         }
     }
 
@@ -129,15 +185,32 @@ public class WispInteractable : MonoBehaviour
 
             switch (currentMode)
             {
+                // TEMPLATE FOR ADDING ANOTHER ENVIRONMENT:
+                // case LocationMode.NewArea:
+                //     // Add logic here, such as:
+                //     // audioSource.PlayOneShot(newAreaClip);
+                //     break;
+
                 case LocationMode.LivingRoom:
                     if (helpClips != null && helpClips.Length > 0)
                     {
                         AudioClip clipToPlay = helpClips[helpClipIndex];
                         if (clipToPlay != null)
                         {
-                            audioSource.PlayOneShot(clipToPlay);
+                            if (interactionChime != null)
+                            {
+                                currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(interactionChime, clipToPlay));
+                            }
+                            else
+                            {
+                                audioSource.PlayOneShot(clipToPlay);
+                            }
                         }
                         helpClipIndex = (helpClipIndex + 1) % helpClips.Length;
+                    }
+                    else if (interactionChime != null)
+                    {
+                        audioSource.PlayOneShot(interactionChime);
                     }
                     break;
                 case LocationMode.Forest:
@@ -150,10 +223,14 @@ public class WispInteractable : MonoBehaviour
                     }
                     break;
                 case LocationMode.Garden:
-                    if (!gardenClipPlayed && gardenClip != null)
+                    if (gardenHelpClips != null && gardenHelpClips.Length > 0)
                     {
-                        audioSource.PlayOneShot(gardenClip);
-                        gardenClipPlayed = true;
+                        AudioClip clipToPlay = gardenHelpClips[gardenHelpClipIndex];
+                        if (clipToPlay != null)
+                        {
+                            audioSource.PlayOneShot(clipToPlay);
+                        }
+                        gardenHelpClipIndex = (gardenHelpClipIndex + 1) % gardenHelpClips.Length;
                     }
                     break;
             }
@@ -241,6 +318,30 @@ public class WispInteractable : MonoBehaviour
 
         // Start loading sequence
         StartCoroutine(LoadMenuRoutine());
+    }
+
+    public void PlayForestOreHint()
+    {
+        if (currentMode != LocationMode.Forest) return;
+
+        if (audioSource != null && helpHintClip != null)
+        {
+            audioSource.Stop();
+            if (currentAudioCoroutine != null) StopCoroutine(currentAudioCoroutine);
+
+            audioSource.PlayOneShot(helpHintClip);
+        }
+    }
+
+    public void PlaySpecificClip(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.Stop();
+            if (currentAudioCoroutine != null) StopCoroutine(currentAudioCoroutine);
+
+            audioSource.PlayOneShot(clip);
+        }
     }
 
     private IEnumerator LoadMenuRoutine()
