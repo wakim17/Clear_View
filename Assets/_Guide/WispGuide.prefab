@@ -5941,26 +5941,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WispInteractable
   currentMode: 0
   wispMenuCanvas: {fileID: 2473545594844478943}
-  livingRoomWelcomeClip: {fileID: 0}
-  helpClips: []
-  forestWelcomeClip: {fileID: 0}
+  livingRoomWelcomeClip: {fileID: 8300000, guid: b33489ff889c24b48848b26bb8c6a1da, type: 3}
+  helpClips:
+  - {fileID: 8300000, guid: 270109ecb7aaf3c4ca9b831dc4d7dd01, type: 3}
+  - {fileID: 8300000, guid: 2679ef7df1b3a2c428ea4820215a5789, type: 3}
+  forestWelcomeClip: {fileID: 8300000, guid: 4ec31abc054bf0144a99f7b1dcc3a727, type: 3}
   totalOres: 5
-  generalCongratsClip: {fileID: 0}
-  helpHintClip: {fileID: 0}
+  generalCongratsClip: {fileID: 8300000, guid: b3399404dafffb84e9b0c160a6b369c3, type: 3}
+  helpHintClip: {fileID: 8300000, guid: 074eb7dfecd9ee94eae4d4a279256153, type: 3}
   remainingOresClips:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  gardenWelcomeClip: {fileID: 0}
-  gardenHelpClips: []
+  - {fileID: 8300000, guid: da59fcf03f46b594d87777c16429e13f, type: 3}
+  - {fileID: 8300000, guid: 8a6af863565477641a9daf326d90239d, type: 3}
+  - {fileID: 8300000, guid: 9af37531b844e264f85afba01293ff75, type: 3}
+  - {fileID: 8300000, guid: c362bf99a1acbf347ae3ca31173b7a62, type: 3}
+  - {fileID: 8300000, guid: 5719e33cdd79c3741a5c22d4b148eb5b, type: 3}
+  - {fileID: 8300000, guid: cb82548af2a62a84a8d9ee675ea0842e, type: 3}
+  gardenWelcomeClip: {fileID: 8300000, guid: aed12d603ea5dd94a901ee7f8245aec1, type: 3}
+  gardenHelpClips:
+  - {fileID: 8300000, guid: b67a07ae575fd1e4da2850b812d27233, type: 3}
+  - {fileID: 8300000, guid: 2679ef7df1b3a2c428ea4820215a5789, type: 3}
   menuSceneName: Main_LivingRoom
   loadDelay: 0.4
   interactionChime: {fileID: 8300000, guid: c77f3da979c2f024bbb492287de0905e, type: 3}
   pulseOnInteraction: 1
-  pulseScaleMultiplier: 1.2
+  pulseScaleMultiplier: 1.3
   pulseDuration: 0.25
 --- !u!114 &6411195921225559625
 MonoBehaviour:

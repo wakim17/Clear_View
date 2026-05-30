@@ -874,7 +874,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WispTriggerArea
   playerTag: Player
   wisp: {fileID: 1962428958}
-  customHintClip: {fileID: 0}
+  customHintClip: {fileID: 8300000, guid: 5c7efd1540f6fdd43b3d42fc144c808f, type: 3}
   triggerOnlyOnce: 1
 --- !u!1 &421421817 stripped
 GameObject:
