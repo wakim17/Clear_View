@@ -1,8 +1,8 @@
 using UnityEngine;
 
-/// <summary>
-/// Script attached to a Copper Ore parent object to handle collection.
-/// </summary>
+/// Attached to a Copper Ore parent object to handle collection logic in VR.
+/// Hides the ore visual, plays a sound, and notifies the Wisp guide upon collection.
+
 public class CopperOre : MonoBehaviour
 {
     [Header("Ore Settings")]
@@ -18,6 +18,7 @@ public class CopperOre : MonoBehaviour
     private Collider oreCollider;
     private WispInteractable wisp;
 
+    /// Initializes components and sets up an AudioSource .
     private void Awake()
     {
         // Cache components for better performance
@@ -26,18 +27,10 @@ public class CopperOre : MonoBehaviour
 
         // Set up AudioSource
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.spatialBlend = 1f; // Make it 3D sound
-            audioSource.playOnAwake = false;
-        }
+
     }
 
-    /// <summary>
-    /// Call this method from an XR Interactable (like XRSimpleInteractable) Select/Activate event,
-    /// or from a standard collider click event.
-    /// </summary>
+    /// Call this method from XRSimpleInteractable Select event.
     public void CollectOre()
     {
         if (isCollected) return;

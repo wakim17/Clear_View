@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
 /// Place this on an empty GameObject with a Trigger Collider (e.g., BoxCollider with IsTrigger = true).
 /// When the player enters, it will trigger the Wisp to tell them about the ores.
-/// </summary>
 public class WispTriggerArea : MonoBehaviour
 {
     [Tooltip("The tag of the player object that can trigger this area.")]
@@ -20,6 +18,7 @@ public class WispTriggerArea : MonoBehaviour
 
     private bool hasTriggered = false;
 
+    /// Automatically finds the WispInteractable in the scene if not manually assigned.
     private void Awake()
     {
         if (wisp == null)
@@ -28,6 +27,7 @@ public class WispTriggerArea : MonoBehaviour
         }
     }
 
+    /// Triggers the Wisp hint when the player enters the collider volume.
     private void OnTriggerEnter(Collider other)
     {
         if (triggerOnlyOnce && hasTriggered) return;

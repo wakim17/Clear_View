@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 
+/// Manages the visual and audio sequence for turning on a virtual TV.
+/// Uses a holographic split animation with simulated flickering.
 public class TVPowerSystem : MonoBehaviour
 {
     [Header("Visuals")]
@@ -26,6 +28,7 @@ public class TVPowerSystem : MonoBehaviour
     private bool isPoweredOn = false;
     private Coroutine activeAnimation;
 
+    /// Caches the initial scale and sets up the CanvasGroup for opacity control.
     private void Awake()
     {
         if (hologramCanvas != null)
@@ -34,7 +37,7 @@ public class TVPowerSystem : MonoBehaviour
             originalScale = hologramCanvas.transform.localScale;
             hologramCanvas.transform.localScale = Vector3.zero;
 
-            // Ensure CanvasGroup is present for opacity fading and flickering
+            // Ensure CanvasGroup is present for fading and flickering
             canvasGroup = hologramCanvas.GetComponent<CanvasGroup>();
             if (canvasGroup == null)
             {
@@ -45,18 +48,19 @@ public class TVPowerSystem : MonoBehaviour
         }
     }
 
+    /// Initiates the TV power-on sequence if it is not already powered on.
     public void PowerOn()
     {
         // This stops the TV from turning on twice if the remote is dropped and grabbed again.
         if (isPoweredOn == true) return;
 
-        // 1. Change the screen material to white
+        // Change the TV screen material to white
         if (screenRenderer != null && whiteScreenMaterial != null)
         {
             screenRenderer.material = whiteScreenMaterial;
         }
 
-        // 2. Open the holographic projection with animation
+        // Open the holographic projection with animation
         if (hologramCanvas != null)
         {
             hologramCanvas.SetActive(true);
@@ -64,7 +68,7 @@ public class TVPowerSystem : MonoBehaviour
             activeAnimation = StartCoroutine(AnimateProjection());
         }
 
-        // 3. Play the start sound
+        // Play the start sound
         if (powerAudio != null)
         {
             if (projectionAudioClip != null)
@@ -80,11 +84,11 @@ public class TVPowerSystem : MonoBehaviour
         isPoweredOn = true;
     }
 
+    /// Coroutine that animates the holographic projection expanding and fading in.
     private IEnumerator AnimateProjection()
     {
         float elapsed = 0f;
         
-        // Initial state reset
         hologramCanvas.transform.localScale = new Vector3(0f, 0f, originalScale.z);
         if (canvasGroup != null) canvasGroup.alpha = 0f;
 
@@ -99,12 +103,12 @@ public class TVPowerSystem : MonoBehaviour
                 float xTime = Mathf.Clamp01(t / 0.4f);
                 float yTime = Mathf.Clamp01((t - 0.4f) / 0.6f);
 
-                // Beautiful cubic-out easing for X expansion
+                // cubic-out easing for X expansion
                 float xVal = 1f - Mathf.Pow(1f - xTime, 3f);
                 
-                // Premium elastic-out bounce easing for Y expansion
+                // elastic-out bounce easing for Y expansion
                 float yVal = yTime == 1f ? 1f : 1f - Mathf.Pow(2f, -10f * yTime) * Mathf.Sin((yTime - 0.075f) * (2f * Mathf.PI) / 0.3f);
-                if (t < 0.4f) yVal = 0.01f; // keep Y very thin during X expand
+                if (t < 0.4f) yVal = 0.01f; 
                 
                 hologramCanvas.transform.localScale = new Vector3(
                     originalScale.x * xVal,

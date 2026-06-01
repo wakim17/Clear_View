@@ -452,7 +452,7 @@ MonoBehaviour:
     m_NormalColor: {r: 0.1176471, g: 0.5647059, b: 1, a: 1}
     m_HighlightedColor: {r: 0.5294118, g: 0.8078432, b: 0.9215687, a: 1}
     m_PressedColor: {r: 0.1882353, g: 0.682353, b: 0.7490196, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.1176471, g: 0.5647059, b: 1, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5851,10 +5851,10 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  MinDistance: 0.1
+  MaxDistance: 20
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0

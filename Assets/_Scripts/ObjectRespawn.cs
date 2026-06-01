@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Respawns an object to its initial position if it falls below a certain height 
-/// or gets too far away from its starting point.
-/// </summary>
+/// Respawns an object to its initial position if it falls below a certain height or gets too far away from its starting point.
+
 public class ObjectRespawn : MonoBehaviour
 {
     [Header("Respawn Conditions")]
@@ -17,6 +15,7 @@ public class ObjectRespawn : MonoBehaviour
     private Quaternion initialRotation;
     private Rigidbody rb;
 
+    /// Caches the initial position, rotation, and Rigidbody reference.
     private void Awake()
     {
         // Store the starting position and rotation
@@ -27,6 +26,7 @@ public class ObjectRespawn : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    /// Continuously checks if the object has exceeded its height or distance limits.
     private void Update()
     {
         // Check if it fell too far down or was thrown too far away
@@ -36,9 +36,7 @@ public class ObjectRespawn : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Resets the object to its original position and stops its momentum.
-    /// </summary>
     public void Respawn()
     {
         transform.position = initialPosition;

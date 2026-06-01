@@ -7,10 +7,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
-/// <summary>
-/// Unity 6 / XRIT 3.x compatible remote pointer.
-/// Bypasses the Interaction Group lock by manually invoking UI clicks AND UI hovers.
-/// </summary>
 public class RemotePointerToggle : MonoBehaviour
 {
     [Header("Component References")]
@@ -23,6 +19,7 @@ public class RemotePointerToggle : MonoBehaviour
 
     private Transform originalRayOrigin;
 
+    /// Subscribes to XR grab and hover events.
     private void OnEnable()
     {
         grabComponent.selectEntered.AddListener(TurnOnLaser);
@@ -39,6 +36,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Unsubscribes from XR grab and hover events.
     private void OnDisable()
     {
         grabComponent.selectEntered.RemoveListener(TurnOnLaser);
@@ -52,6 +50,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Turns on the laser pointer when the controller is selected/grabbed.
     private void TurnOnLaser(SelectEnterEventArgs args)
     {
         if (controllerRay != null && lineVisual != null)
@@ -68,6 +67,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Turns off the laser pointer when the controller is released.
     private void TurnOffLaser(SelectExitEventArgs args)
     {
         if (controllerRay != null && lineVisual != null)
@@ -78,6 +78,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Manually triggers a UI click on the hovered button when the trigger is pulled.
     private void ClickUI(ActivateEventArgs args)
     {
         if (controllerRay != null && controllerRay.TryGetCurrentUIRaycastResult(out RaycastResult result))
@@ -90,6 +91,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Forces a UI element to highlight when hovered by the laser.
     private void ForceHoverEnter(UIHoverEventArgs args)
     {
         if (args.uiObject != null)
@@ -103,6 +105,7 @@ public class RemotePointerToggle : MonoBehaviour
         }
     }
 
+    /// Forces a UI element to return to normal when the laser exits.
     private void ForceHoverExit(UIHoverEventArgs args)
     {
         if (args.uiObject != null)

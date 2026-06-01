@@ -2,10 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-/// <summary>
-/// Allows the player to interact with the magical wisp guide.
+/// Allows the player to interact with the wisp guide.
 /// Toggles a floating UI menu with options to ask for help or return to the menu.
-/// </summary>
 public class WispInteractable : MonoBehaviour
 {
     // TEMPLATE FOR ADDING ANOTHER ENVIRONMENT:
@@ -72,31 +70,28 @@ public class WispInteractable : MonoBehaviour
     private int gardenHelpClipIndex = 0;
     private Coroutine currentAudioCoroutine;
 
+    /// Caches the original scale and initializes the AudioSource. Ensures the menu starts hidden.
     private void Awake()
     {
         originalScale = transform.localScale;
 
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-        
         audioSource.spatialBlend = 1f; 
         audioSource.playOnAwake = false;
 
-        // Ensure the menu starts hidden so it doesn't block view automatically
         if (wispMenuCanvas != null)
         {
             wispMenuCanvas.SetActive(false);
         }
     }
 
+    /// Starts the welcome clip delay.
     private void Start()
     {
         StartCoroutine(PlayWelcomeClipWithDelay());
     }
 
+    /// Checks if a pulse animation needs to be triggered.
     private void Update()
     {
         if (pulseOnInteraction && !isPulsing && audioSource != null && audioSource.isPlaying)
@@ -105,25 +100,20 @@ public class WispInteractable : MonoBehaviour
         }
     }
 
+    /// Waits for a short duration before playing the appropriate welcome audio clip for the scene.
     private IEnumerator PlayWelcomeClipWithDelay()
     {
         yield return new WaitForSeconds(1f);
 
         if (audioSource == null) yield break;
 
-        AudioClip clipToPlay = null;
-        switch (currentMode)
+        AudioClip clipToPlay = currentMode switch
         {
-            case LocationMode.LivingRoom:
-                clipToPlay = livingRoomWelcomeClip;
-                break;
-            case LocationMode.Forest:
-                clipToPlay = forestWelcomeClip;
-                break;
-            case LocationMode.Garden:
-                clipToPlay = gardenWelcomeClip;
-                break;
-        }
+            LocationMode.LivingRoom => livingRoomWelcomeClip,
+            LocationMode.Forest => forestWelcomeClip,
+            LocationMode.Garden => gardenWelcomeClip,
+            _ => null
+        };
 
         if (clipToPlay != null)
         {
@@ -131,10 +121,8 @@ public class WispInteractable : MonoBehaviour
         }
     }
 
-    /// <summary>
     /// Core interaction method called by XRSimpleInteractable when the Wisp is clicked.
     /// Toggles the menu on and off.
-    /// </summary>
     public void Interact()
     {
         if (isLoadingMenu) return;
@@ -157,111 +145,90 @@ public class WispInteractable : MonoBehaviour
             wispMenuCanvas.SetActive(!wispMenuCanvas.activeSelf);
         }
 
-        // Play magical feedback
+        // Play feedback
         if (audioSource != null && interactionChime != null)
         {
             audioSource.PlayOneShot(interactionChime);
         }
     }
 
-    /// <summary>
-    /// Called by the UI "Help" Button.
-    /// </summary>
+    /// Called by the UI "Help" Button. Plays specific help audio based on the current scene context.
     public void PlayHelpAudio()
     {
-        // Hide menu after asking for help to keep the screen clear
-        if (wispMenuCanvas != null)
-        {
-            wispMenuCanvas.SetActive(false);
-        }
+        if (wispMenuCanvas != null) wispMenuCanvas.SetActive(false);
+        if (audioSource == null) return;
 
-        if (audioSource != null)
-        {
-            audioSource.Stop(); // Stop any current audio
-            if (currentAudioCoroutine != null)
-            {
-                StopCoroutine(currentAudioCoroutine);
-            }
+        StopCurrentAudio();
 
-            switch (currentMode)
-            {
+        switch (currentMode)
+        {
                 // TEMPLATE FOR ADDING ANOTHER ENVIRONMENT:
                 // case LocationMode.NewArea:
                 //     // Add logic here, such as:
                 //     // audioSource.PlayOneShot(newAreaClip);
                 //     break;
 
-                case LocationMode.LivingRoom:
-                    if (helpClips != null && helpClips.Length > 0)
+            case LocationMode.LivingRoom:
+                if (helpClips != null && helpClips.Length > 0)
+                {
+                    AudioClip clipToPlay = helpClips[helpClipIndex];
+                    if (clipToPlay != null)
                     {
-                        AudioClip clipToPlay = helpClips[helpClipIndex];
-                        if (clipToPlay != null)
+                        if (interactionChime != null)
                         {
-                            if (interactionChime != null)
-                            {
-                                currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(interactionChime, clipToPlay));
-                            }
-                            else
-                            {
-                                audioSource.PlayOneShot(clipToPlay);
-                            }
+                            currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(interactionChime, clipToPlay));
                         }
-                        helpClipIndex = (helpClipIndex + 1) % helpClips.Length;
-                    }
-                    else if (interactionChime != null)
-                    {
-                        audioSource.PlayOneShot(interactionChime);
-                    }
-                    break;
-                case LocationMode.Forest:
-                    int oresLeft = totalOres - oresCollected;
-                    AudioClip remainingClip = GetRemainingOreClip(oresLeft);
-                    
-                    if (helpHintClip != null || remainingClip != null)
-                    {
-                        currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(helpHintClip, remainingClip));
-                    }
-                    break;
-                case LocationMode.Garden:
-                    if (gardenHelpClips != null && gardenHelpClips.Length > 0)
-                    {
-                        AudioClip clipToPlay = gardenHelpClips[gardenHelpClipIndex];
-                        if (clipToPlay != null)
+                        else
                         {
                             audioSource.PlayOneShot(clipToPlay);
                         }
-                        gardenHelpClipIndex = (gardenHelpClipIndex + 1) % gardenHelpClips.Length;
                     }
-                    break;
-            }
+                    helpClipIndex = (helpClipIndex + 1) % helpClips.Length;
+                }
+                else if (interactionChime != null)
+                {
+                    audioSource.PlayOneShot(interactionChime);
+                }
+                break;
+                
+            case LocationMode.Forest:
+                int oresLeft = totalOres - oresCollected;
+                AudioClip remainingClip = GetRemainingOreClip(oresLeft);
+                
+                if (helpHintClip != null || remainingClip != null)
+                {
+                    currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(helpHintClip, remainingClip));
+                }
+                break;
+                
+            case LocationMode.Garden:
+                if (gardenHelpClips != null && gardenHelpClips.Length > 0)
+                {
+                    AudioClip clipToPlay = gardenHelpClips[gardenHelpClipIndex];
+                    if (clipToPlay != null) audioSource.PlayOneShot(clipToPlay);
+                    gardenHelpClipIndex = (gardenHelpClipIndex + 1) % gardenHelpClips.Length;
+                }
+                break;
         }
     }
 
-    /// <summary>
-    /// Called by CopperOre when an ore is collected.
-    /// </summary>
+    /// Called by CopperOre when an ore is collected. Increments counter and plays congratulatory audio.
     public void OnOreCollected()
     {
         if (currentMode != LocationMode.Forest) return;
 
-        oresCollected++;
-        if (oresCollected > totalOres) oresCollected = totalOres; // Cap it just in case
+        oresCollected = Mathf.Min(oresCollected + 1, totalOres);
 
         if (audioSource != null)
         {
-            // If already playing audio, stop it so we can play the congrats immediately
-            audioSource.Stop(); 
-            if (currentAudioCoroutine != null)
-            {
-                StopCoroutine(currentAudioCoroutine);
-            }
-            
+            StopCurrentAudio();
             int oresLeft = totalOres - oresCollected;
             AudioClip remainingClip = GetRemainingOreClip(oresLeft);
             currentAudioCoroutine = StartCoroutine(PlaySequentialAudio(generalCongratsClip, remainingClip));
         }
     }
 
+    /// Helper method to fetch the correct audio clip based on remaining ores.
     private AudioClip GetRemainingOreClip(int oresLeft)
     {
         if (remainingOresClips != null && oresLeft >= 0 && oresLeft < remainingOresClips.Length)
@@ -271,13 +238,25 @@ public class WispInteractable : MonoBehaviour
         return null;
     }
 
+    /// Stops any currently playing audio and running audio coroutines.
+    private void StopCurrentAudio()
+    {
+        if (audioSource != null) audioSource.Stop();
+        if (currentAudioCoroutine != null)
+        {
+            StopCoroutine(currentAudioCoroutine);
+            currentAudioCoroutine = null;
+        }
+    }
+
+    /// Plays two audio clips back-to-back using a coroutine.
     private IEnumerator PlaySequentialAudio(AudioClip firstClip, AudioClip secondClip)
     {
         if (firstClip != null)
         {
             audioSource.clip = firstClip;
             audioSource.Play();
-            yield return new WaitForSeconds(firstClip.length + 0.1f); // small gap
+            yield return new WaitForSeconds(firstClip.length + 0.1f); 
         }
 
         if (secondClip != null)
@@ -287,63 +266,42 @@ public class WispInteractable : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called by the UI "Main Menu" Button.
-    /// </summary>
+    /// Called by the UI "Main Menu" Button. Starts the scene loading sequence.
     public void ReturnToMenu()
     {
         if (isLoadingMenu) return;
 
-        // The living room IS the main menu, so don't reload the scene if we are already here.
-        if (currentMode == LocationMode.LivingRoom)
-        {
-            if (wispMenuCanvas != null)
-            {
-                wispMenuCanvas.SetActive(false);
-            }
-            return;
-        }
-        
-        // Hide the menu immediately
-        if (wispMenuCanvas != null)
-        {
-            wispMenuCanvas.SetActive(false);
-        }
+        if (wispMenuCanvas != null) wispMenuCanvas.SetActive(false);
 
-        // Pulse for visual feedback that the button worked
+        if (currentMode == LocationMode.LivingRoom) return;
+
         if (pulseOnInteraction && !isPulsing)
         {
             StartCoroutine(PulseSequence());
         }
 
-        // Start loading sequence
         StartCoroutine(LoadMenuRoutine());
     }
 
+    /// Plays a default hint related to ores when the player enters a trigger area in the forest.
     public void PlayForestOreHint()
     {
-        if (currentMode != LocationMode.Forest) return;
+        if (currentMode != LocationMode.Forest || audioSource == null || helpHintClip == null) return;
 
-        if (audioSource != null && helpHintClip != null)
-        {
-            audioSource.Stop();
-            if (currentAudioCoroutine != null) StopCoroutine(currentAudioCoroutine);
-
-            audioSource.PlayOneShot(helpHintClip);
-        }
+        StopCurrentAudio();
+        audioSource.PlayOneShot(helpHintClip);
     }
 
+    /// Plays a specific audio clip directly, stopping any currently playing clips.
     public void PlaySpecificClip(AudioClip clip)
     {
-        if (audioSource != null && clip != null)
-        {
-            audioSource.Stop();
-            if (currentAudioCoroutine != null) StopCoroutine(currentAudioCoroutine);
+        if (audioSource == null || clip == null) return;
 
-            audioSource.PlayOneShot(clip);
-        }
+        StopCurrentAudio();
+        audioSource.PlayOneShot(clip);
     }
 
+    /// Coroutine that handles waiting for animations to finish before loading the menu scene.
     private IEnumerator LoadMenuRoutine()
     {
         isLoadingMenu = true;
@@ -360,15 +318,17 @@ public class WispInteractable : MonoBehaviour
         }
     }
 
+    /// Coroutine that scales the Wisp up and down briefly to provide visual feedback upon interaction.
     private IEnumerator PulseSequence()
     {
         isPulsing = true;
         
         float halfDuration = pulseDuration * 0.5f;
         
-        // Scale up
         float elapsed = 0f;
         Vector3 pulseScale = originalScale * pulseScaleMultiplier;
+        
+        // Scale up
         while (elapsed < halfDuration)
         {
             elapsed += Time.deltaTime;

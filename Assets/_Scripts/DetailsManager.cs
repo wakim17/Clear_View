@@ -1,7 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using TMPro; // This line is required for TextMeshPro
+using TMPro; 
+
+/// Manages the UI transitions and data display for the main menu.
+/// Handles switching between the grid and detail views, and loads target scenes.
 
 public class DetailsManager : MonoBehaviour
 {
@@ -11,8 +14,8 @@ public class DetailsManager : MonoBehaviour
 
     [Header("Details Visuals")]
     public Image displayImage;
-    public TextMeshProUGUI displayTitle; // Upgraded to TMP
-    public TextMeshProUGUI displayDescription; // Upgraded to TMP
+    public TextMeshProUGUI displayTitle; 
+    public TextMeshProUGUI displayDescription; 
 
     [Header("Transition")]
     [Tooltip("Optional portal transition system. If assigned, loading the target scene will trigger the portal transition effect.")]
@@ -20,7 +23,12 @@ public class DetailsManager : MonoBehaviour
 
     private string currentTargetScene = "";
 
-    // Added the 'title' string to the incoming data
+    /// Populates the details menu with the specified data and makes it visible.
+    /// "sceneName" The target scene to load if selected.
+    /// "title" The title of the app.
+    /// "description" A description of the app.
+    /// "previewImage" An image preview for the app.
+
     public void OpenDetails(string sceneName, string title, string description, Sprite previewImage)
     {
         currentTargetScene = sceneName;
@@ -32,23 +40,25 @@ public class DetailsManager : MonoBehaviour
         detailsMenu.SetActive(true);
     }
 
+    /// Closes the details menu and returns the user to the main grid view.
     public void GoBack()
     {
         detailsMenu.SetActive(false);
         gridMenu.SetActive(true);
     }
 
+    /// Initiates loading the target scene, using a portal transition.
     public void LoadTargetScene()
     {
         if (!string.IsNullOrEmpty(currentTargetScene))
         {
             if (portalTransition != null)
             {
-                // Trigger the gorgeous portal transition sequence
+                // Trigger the portal transition
                 portalTransition.SetTargetEnvironment(currentTargetScene);
                 portalTransition.LoadEnvironment();
 
-                // Close the details menu immediately so the user can see the portal open!
+                // Close the details menu so the user can see the portal!
                 if (detailsMenu != null)
                 {
                     detailsMenu.SetActive(false);
@@ -56,7 +66,6 @@ public class DetailsManager : MonoBehaviour
             }
             else
             {
-                // Graceful fallback: load immediately if portal is not configured
                 SceneManager.LoadScene(currentTargetScene);
             }
         }

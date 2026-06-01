@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Controls the core session loop and tracks the time limit.
-/// Triggers the final audio guide when the time expires.
-/// </summary>
+/// Tracks the session time limit.
+/// Triggers a final audio guide when the time expires.
 public class SessionManager : MonoBehaviour
 {
     [Header("Session Timing")]
@@ -18,6 +16,7 @@ public class SessionManager : MonoBehaviour
     private float currentSessionTime = 0f;
     private bool hasPlayedMessage = false;
 
+    /// Checks the elapsed time and plays the final exit message if the limit is reached.
     private void Update()
     {
         if (!hasPlayedMessage)
